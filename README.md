@@ -8,7 +8,7 @@ El servicio está desplegado en Render y disponible en:
 
 - **URL base:** [https://prestamoservice-ntgf.onrender.com/](https://prestamoservice-ntgf.onrender.com/)
 
-> **Nota:** Si el servicio está en el plan gratuito de Render, la primera petición tras un periodo de inactividad puede tardar unos segundos mientras la instancia se reactiva.
+> **Nota:** El servicio está en el plan gratuito de Render, la primera petición tras un periodo de inactividad puede tardar unos segundos mientras la instancia se reactiva.
 
 ## Tecnologías
 
@@ -50,8 +50,6 @@ El servicio está desplegado en Render y disponible en:
 | `POST` | `/api/prestamos` | Registra un nuevo préstamo |
 | `PUT` | `/api/prestamos/{id}` | Actualiza un préstamo existente |
 | `DELETE` | `/api/prestamos/{id}` | Elimina un préstamo |
-
-*(Actualiza las rutas según los controladores de tu proyecto).*
 
 ## Autor
 
