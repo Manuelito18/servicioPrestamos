@@ -1,0 +1,32 @@
+# Artefactos de build
+target/
+*.jar
+*.war
+*.class
+
+# Control de versiones / IDE
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Documentacion y colecciones (no se necesitan dentro de la imagen)
+postman/
+SPEC_PARTE1_API.md
+DEPLOY_RENDER.md
+README.md
+*.md
+
+# Entorno y logs
+.env
+.env.*
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

@@ -1,0 +1,531 @@
+{
+  "info": {
+    "_postman_id": "a7f3c1d9-4b2e-4c8a-9f61-3d5e7a0b2c84",
+    "name": "PrestaControl API",
+    "description": "Coleccion oficial de PrestaControl (prestamoservice).\n\nOrden recomendado:\n1. Auth > Register (o Login): guarda el token automaticamente en la variable {{token}}.\n2. Prestamos > Listar / Crear / Obtener / Actualizar / Eliminar / Resumen.\n3. Seguridad > Sin token: valida la respuesta 401 personalizada.\n\nVariables de coleccion:\n- {{base_url}}: URL del API (local o Render).\n- {{token}}: JWT capturado automaticamente por los scripts de Register y Login.\n- {{prestamo_id}}: ID del prestamo creado o del primero listado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints publicos de registro e inicio de sesion.",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Devuelve un token JWT\", function () {",
+                  "    pm.expect(body.token).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "if (body.token) {",
+                  "    pm.collectionVariables.set(\"token\", body.token);",
+                  "    console.log(\"Token guardado automaticamente en {{token}}\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan Perez\",\n  \"email\": \"juan@mail.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Crea el prestamista y devuelve { token }. Guarda el token en {{token}} automaticamente."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "",
+                  "pm.test(\"Devuelve un token JWT\", function () {",
+                  "    pm.expect(body.token).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "if (body.token) {",
+                  "    pm.collectionVariables.set(\"token\", body.token);",
+                  "    console.log(\"Token de login guardado automaticamente en {{token}}\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@mail.com\",\n  \"password\": \"Password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Valida credenciales y devuelve { token }. Guarda el token en {{token}} automaticamente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Prestamos",
+      "description": "Endpoints protegidos. Requieren Authorization: Bearer {{token}}.",
+      "item": [
+        {
+          "name": "Listar prestamos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const prestamos = pm.response.json();",
+                  "",
+                  "pm.test(\"Devuelve un arreglo de prestamos\", function () {",
+                  "    pm.expect(prestamos).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "if (Array.isArray(prestamos) && prestamos.length > 0) {",
+                  "    pm.collectionVariables.set(\"prestamo_id\", String(prestamos[0].id));",
+                  "    pm.test(\"Cada prestamo incluye totalCobrar\", function () {",
+                  "        pm.expect(prestamos[0]).to.have.property(\"totalCobrar\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/prestamos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Lista solo los prestamos del prestamista autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener prestamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const prestamo = pm.response.json();",
+                  "",
+                  "pm.test(\"Contrato JSON completo\", function () {",
+                  "    pm.expect(prestamo).to.include.keys(\"id\", \"cliente\", \"dni\", \"monto\", \"interes\", \"totalCobrar\", \"fechaPrestamo\", \"fechaVencimiento\", \"pagado\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/prestamos/{{prestamo_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos",
+                "{{prestamo_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Devuelve un prestamo por ID solo si pertenece al prestamista del token."
+          },
+          "response": []
+        },
+        {
+          "name": "Crear prestamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const prestamo = pm.response.json();",
+                  "",
+                  "if (prestamo.id) {",
+                  "    pm.collectionVariables.set(\"prestamo_id\", String(prestamo.id));",
+                  "}",
+                  "",
+                  "pm.test(\"totalCobrar = monto + monto * interes / 100\", function () {",
+                  "    const esperado = Number(prestamo.monto) + (Number(prestamo.monto) * Number(prestamo.interes) / 100);",
+                  "    pm.expect(Number(prestamo.totalCobrar)).to.be.closeTo(esperado, 0.01);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": \"Carlos Gomez\",\n  \"dni\": \"72458910\",\n  \"monto\": 1000.00,\n  \"interes\": 15.00,\n  \"fechaVencimiento\": \"2026-12-25\",\n  \"pagado\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/prestamos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Registra un prestamo. fechaPrestamo la asigna la API y totalCobrar se calcula en backend. Guarda el ID en {{prestamo_id}}."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar prestamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const prestamo = pm.response.json();",
+                  "",
+                  "pm.test(\"Prestamo marcado como pagado\", function () {",
+                  "    pm.expect(prestamo.pagado).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": \"Carlos Gomez\",\n  \"dni\": \"72458910\",\n  \"monto\": 1000.00,\n  \"interes\": 15.00,\n  \"fechaVencimiento\": \"2026-12-25\",\n  \"pagado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/prestamos/{{prestamo_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos",
+                "{{prestamo_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Modifica el prestamo o lo marca como pagado (pagado: true)."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar prestamo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204 No Content\", function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/prestamos/{{prestamo_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos",
+                "{{prestamo_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Anula un prestamo registrado por error."
+          },
+          "response": []
+        },
+        {
+          "name": "Resumen de cartera",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const resumen = pm.response.json();",
+                  "",
+                  "pm.test(\"Contrato del resumen\", function () {",
+                  "    pm.expect(resumen).to.include.keys(\"capitalPrestado\", \"totalPorCobrar\", \"gananciaEsperada\");",
+                  "});",
+                  "",
+                  "pm.test(\"gananciaEsperada = totalPorCobrar - capitalPrestado\", function () {",
+                  "    const esperado = Number(resumen.totalPorCobrar) - Number(resumen.capitalPrestado);",
+                  "    pm.expect(Number(resumen.gananciaEsperada)).to.be.closeTo(esperado, 0.01);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/prestamos/resumen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos",
+                "resumen"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Devuelve capitalPrestado, totalPorCobrar y gananciaEsperada del prestamista autenticado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seguridad",
+      "description": "Pruebas de seguridad del API.",
+      "item": [
+        {
+          "name": "401 sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Respuesta 401 personalizada en JSON\", function () {",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql(401);",
+                  "    pm.expect(body.message).to.be.a(\"string\").and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/prestamos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "prestamos"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Llama a /prestamos SIN cabecera Authorization. Debe devolver 401 con JSON personalizado."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://prestamoservice-ntgf.onrender.com",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prestamo_id",
+      "value": "1",
+      "type": "string"
+    }
+  ]
+}
